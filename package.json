@@ -1,0 +1,16 @@
+{
+  "name" : "scaffold-grunt-0.4.0",
+  "version" : "0.0.1",
+  "dependencies" : {
+    "grunt" : "0.4.0",
+    "grunt-mocha" : "",
+    "grunt-contrib" : "",
+    "grunt-contrib-less" : "",
+    "grunt-contrib-requirejs" : "",
+    "grunt-contrib-copy" : "",
+    "grunt-contrib-jshint" : "",
+    "grunt-contrib-clean" : "",
+    "grunt-clean" : "",
+    "grunt-lib-contrib" : ""
+  }
+}
