@@ -7,14 +7,14 @@ require.config({
         test : '../test',
 
         // external libs
-        jquery : '../components/jquery/jquery',
-        underscore : '../components/underscore/underscore',
-        backbone : '../components/backbone/backbone',
-        bootstrap : '../comonents/bootstrap/docs/assets/js/bootstrap',
-        text : '../components/requirejs-text/text',
-        mocha : '../components/mocha/mocha',
-        expect : '../components/expect/expect',
-        sinon : '../components/sinon/sinon',
+        jquery : '../../components/jquery/jquery',
+        underscore : '../../components/underscore/underscore',
+        backbone : '../../components/backbone/backbone',
+        bootstrap : '../../comonents/bootstrap/docs/assets/js/bootstrap',
+        text : '../../components/requirejs-text/text',
+        mocha : '../../components/mocha/mocha',
+        expect : '../../components/expect/expect',
+        sinon : '../../components/sinon/sinon',
 
         // environment settings
         env : 'env/local',

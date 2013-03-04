@@ -13,23 +13,11 @@ module.exports = function (grunt) {
    * Note: If the instrument method throws an error this task will force an abort.
    */
   grunt.registerMultiTask('cover', 'Instruments JavaScript Files using coverjs.', function () {
-    var path = require('path');
-    var helpers = require('grunt-lib-contrib').init(grunt);
-    var _ = grunt.utils._;
     var Instrument = require('coverjs').Instrument;
 
-    var options = helpers.options(this, {
-      basePath: false,
-      flatten: false
-    });
-
-    var srcFiles;
-    var basePath;
-    var instrumentedSrc;
-    var newFileDest;
-
     //TODO: ditch this when grunt v0.4 is released
-    this.files = this.files || helpers.normalizeMultiTaskFiles(this.data, this.target);
+    this.files = this.files ||
+        grunt.task.normalizeMultiTaskFiles(this.data, ['files']);
 
     /**
      * Instruments the given source file.
@@ -47,26 +35,18 @@ module.exports = function (grunt) {
         grunt.log.error(_.sprintf('File %s could not be instrumented.', srcFile));
         grunt.fatal(e, 3);
       }
-    }
+    };
 
-    this.files.forEach(function (file) {
-      file.dest = path.normalize(file.dest);
-      srcFiles = grunt.file.expandFiles(file.src);
+    this.files.forEach(function(file) {
+      var mappings = grunt.file.expandMapping(file['src'], file['dest']);
+      mappings.forEach(function(mapping) {
+        var instrumented = coverFile(mapping['src']);
 
-      if (srcFiles.length === 0) {
-        grunt.log.error('No source files found');
-        return;
-      }
-
-      srcFiles.forEach(function (srcFile) {
-        instrumentedSrc = coverFile(srcFile);
-
-        basePath = helpers.findBasePath(srcFiles, options.basePath);
-        newFileDest = helpers.buildIndividualDest(file.dest, srcFile, basePath, options.flatten);
-
-        grunt.file.write(newFileDest, instrumentedSrc);
-        grunt.log.ok(_.sprintf('Created: %s', newFileDest));
+        grunt.file.write(mapping['dest'], instrumented);
+        grunt.log.writeln('Instrumented file ' +  mapping['src'] +
+            ' -> ' + mapping['dest']);
       });
     });
+
   });
 };

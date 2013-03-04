@@ -1,12 +1,15 @@
 module.exports = function(grunt) {
 
+  var hash = (new Date()).getTime();
+
   grunt.initConfig({
     pkg : grunt.file.readJSON('package.json'),
 
     clean : {
-      tmp : ['tmp'],
-      cover : ['cover'],
-      dist : ['dist']
+      code : ['temp', 'cover'],
+      dist : ['dist'],
+      local : ['dist/local'],
+      prod : ['dist/prod']
     },
 
     jshint : {
@@ -26,6 +29,27 @@ module.exports = function(grunt) {
       }
     },
 
+    copy : {
+      code : {
+        files : {
+          'temp/' : ['app/**', 'test/**']
+        }
+      },
+      cover : {
+        files : {
+          'cover/' : ['app/**', 'test/**']
+        }
+      }
+    },
+
+    cover : {
+      compile : {
+        files : {
+          'cover/' : 'app/**/*.js'
+        }
+      }
+    },
+
     mocha : {
       index : ['test/index.html']
     },
@@ -36,8 +60,27 @@ module.exports = function(grunt) {
           paths : ['components/bootstrap/less', 'components/less-elements']
         },
         files : {
-          'dist/local/css/app.css' : 'app/view/MainView.less'
+          'dist/local/css/app.css' : 'temp/app/view/MainView.less'
         }
+      },
+      compressed : {
+        options : {
+          paths : ['components/bootstrap/less', 'components/less-elements'],
+          compress : true
+        },
+        files : (function() {
+          var res = {};
+          res['dist/prod/css/app' + hash + '.css'] =
+              'temp/app/view/MainView.less';
+          return res;
+        })()
+      }
+    },
+
+    watch : {
+      code : {
+        files : ['app/**', 'test/**'],
+        tasks : 'compile'
       }
     },
 
@@ -46,13 +89,26 @@ module.exports = function(grunt) {
         options : {
           almond : true,
           include : 'config.js',
-          baseUrl : 'app/',
-          mainConfigFile : 'app/config.js',
+          baseUrl : 'temp/app/',
+          mainConfigFile : 'temp/app/config.js',
           out : 'dist/local/js/app.js',
           optimize : 'none'
         },
         path : {
-          env : 'app/env/local.js'
+          env : 'temp/app/env/local.js'
+        }
+      },
+
+      prod : {
+        options : {
+          almond : true,
+          include : 'config.js',
+          baseUrl : 'temp/app/',
+          mainConfigFile : 'temp/app/config.js',
+          out : 'dist/prod/js/app' + hash + '.js'
+        },
+        path : {
+          env : 'temp/app/env/prod.js'
         }
       }
     },
@@ -65,6 +121,14 @@ module.exports = function(grunt) {
           css : 'app',
           js : 'app'
         }
+      },
+      prod : {
+        src : 'index-prod.html',
+        dest : 'dist/prod/index.html',
+        data : {
+          css : 'app' + hash,
+          js : 'app' + hash
+        }
       }
     }
 
@@ -74,13 +138,24 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-requirejs');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-mocha');
 
-  grunt.registerTask('compile', ['clean', 'jshint', 'mocha',
-      'less:uncompressed', 'index:local']);
-  grunt.registerTask('dist:local', ['compile', 'requirejs:local']);
-  grunt.registerTask('default', ['dist:local']);
+  // helper tasks
+  grunt.registerTask('coverage', ['copy:cover', 'cover']);
+  grunt.registerTask('test', ['coverage', 'mocha']);
+  grunt.registerTask('compile', ['clean:code', 'copy:code', 'jshint', 'test']);
 
+  // dist tasks
+  grunt.registerTask('dist:local', ['clean:local',
+      'compile', 'less:uncompressed', 'index:local', 'requirejs:local']);
+  grunt.registerTask('dist:prod', ['clean:prod',
+      'compile', 'less:compressed', 'index:prod', 'requirejs:prod']);
+  grunt.registerTask('dist:all', ['clean', 'dist:local', 'dist:prod']);
+
+  // default
+  grunt.registerTask('default', ['clean', 'dist:local', 'watch']);
 };
