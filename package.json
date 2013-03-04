@@ -6,7 +6,7 @@
     "grunt-mocha" : "",
     "grunt-contrib" : "",
     "grunt-contrib-less" : "",
-    "grunt-contrib-requirejs" : "",
+    "grunt-requirejs" : "",
     "grunt-contrib-copy" : "",
     "grunt-contrib-jshint" : "",
     "grunt-contrib-clean" : "",
